@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script
+      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+      integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/DRACOLoader.js"></script>
+
+		<script>
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+
+      const texture = new THREE.TextureLoader().load(
+        'https://firebasestorage.googleapis.com/v0/b/harpy-prod.appspot.com/o/glb%2Fbalor_test.jpg?alt=media&token=ea330649-4d8a-479c-9700-b658a2fb42b1'
+      );
+      texture.encoding = THREE.sRGBEncoding;
+
+      const gltfLoader = new THREE.GLTFLoader();
+
+      const dracoLoader = new THREE.DRACOLoader();
+      dracoLoader.setDecoderPath('https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/libs/draco/'); // Specify path to a folder containing WASM/JS decoding libraries.
+      dracoLoader.preload(); // Optional: Pre-fetch Draco WASM/JS module.
+
+      gltfLoader.setDRACOLoader(dracoLoader);
+
+      gltfLoader.load(
+        'https://firebasestorage.googleapis.com/v0/b/harpy-prod.appspot.com/o/glb%2Fbalor_test.glb?alt=media&token=cbbb7a66-d77b-4677-8358-3e0431f19507',
+        (gltf) => {
+          gltf.scene.traverse((object) => {
+            
+            if (object.type === 'SkinnedMesh') {
+              console.log(object);
+              texture.flipY = false;
+              object.material.normalMap = texture;
+              object.material.needsUpdate = true;
+            }
+          });
+
+          gltf.scene.name = 'Balor';
+          console.log('la');
+          scene.add(gltf.scene);
+        }
+      );
+
+      camera.position.z = 5;
+
+      const animate = function () {
+        requestAnimationFrame(animate);
+
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+
+		</script>
+	</body>
+</html>
+
